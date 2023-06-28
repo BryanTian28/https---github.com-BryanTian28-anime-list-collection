@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import Homepage from "./pages/Homepage";
 import { Routes, Route } from "react-router-dom";
 import AnimeDetailPage from "./pages/AnimeDetailPage";
+import CollectionPage from "./pages/CollectionPage";
 
 const App: React.FC = () => {
   return (
@@ -13,6 +14,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/detail/:id" element={<AnimeDetailPage />} />
+        <Route path="/collections" element={<CollectionPage />} />
       </Routes>
     </div>
   );

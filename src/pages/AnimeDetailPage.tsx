@@ -129,7 +129,7 @@ const AnimeDetailPage: React.FC = () => {
         <>
           <Section>
             <Container>
-              <img
+              <Banner
                 src={data.Media.bannerImage}
                 alt={data.Media.coverImage.medium}
               />
@@ -228,9 +228,9 @@ const AnimeDetailPage: React.FC = () => {
     return null;
   };
   return (
-    <>
+    <div className="bg-[#222] min-h-screen">
       <GetAnimeDetail />
-    </>
+    </div>
   );
 };
 
@@ -250,19 +250,26 @@ const Section = styled.section`
   padding: 2rem 0;
   display: flex;
   flex-direction: row;
-  height: full;
+  min-height: 100vh;
   `;
 
 const Container = styled.div`
   max-width: 75vw;
   margin: 0;
   margin-left: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
   color: #fff;
   padding-top: 2rem;
   left: 0;
 `;
 
+const Banner = styled.img`
+  max-width: 860px;
+  max-height: 200px;
+`;
 const Title = styled.h2`
   font-size: 2rem;
   font-weight: bold;
@@ -299,7 +306,7 @@ const RightSide = styled.div`
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-top: 10rem;
+  margin-top: 8rem;
   margin-left: 1rem;
   padding-right: 2rem;
 `;

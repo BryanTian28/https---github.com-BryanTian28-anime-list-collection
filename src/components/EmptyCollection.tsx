@@ -2,23 +2,22 @@ import React from "react";
 import styled from "@emotion/styled";
 
 interface Collection {
-  url: string;
   name: string;
   onClick: Function;
 }
 
-const CollectionCard: React.FC<Collection> = ({ url, name, onClick }) => {
+const EmptyCollection: React.FC<Collection> = ({ name, onClick }) => {
   return (
     <>
       <StyledContainer onClick={() => onClick()}>
-        <StyledImage src={url} />
-        <StyledTitle>{name}</StyledTitle>
+        <StyledTitle className="mt-20">No Animes Yet</StyledTitle>
+        <StyledTitle className="mt-28">{name}</StyledTitle>
       </StyledContainer>
     </>
   );
 };
 
-export default CollectionCard;
+export default EmptyCollection;
 
 const StyledContainer = styled.div`
   position: relative;
@@ -42,11 +41,6 @@ const StyledContainer = styled.div`
   }
 `;
 
-const StyledImage = styled.img`
-  overflow: hidden;
-  height: 240px;
-  margin-bottom: 1rem;
-`;
 const StyledTitle = styled.h3`
   font-size: 1rem;
   padding: 1rem;

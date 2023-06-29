@@ -357,18 +357,3 @@ const AnimeListContainer = styled.div`
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 `;
-
-// const Link = styled.a`
-//   display: inline-block;
-//   padding: 0.8rem 1.5rem;
-//   background-color: #333;
-//   color: #fff;
-//   text-decoration: none;
-//   border-radius: 4px;
-//   font-weight: bold;
-//   transition: background-color 0.3s ease;
-
-//   &:hover {
-//     background-color: #555;
-//   }
-// `;

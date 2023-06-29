@@ -1,10 +1,9 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 import styled from "@emotion/styled";
-import CollectionCard from "../components/CollectionCard";
-import { log } from "console";
-import EmptyCollection from "../components/EmptyCollection";
+import empty from "../assets/empty.jpeg";
+import Modal from "../components/Modal";
 
 type ModalProps = {
   isOpen: boolean;
@@ -17,10 +16,68 @@ interface Item {
     large: string;
   };
 }
+interface Collection {
+  url: string;
+  name: string;
+  onClick: Function;
+}
+
+interface EmptyCollection {
+  name: string;
+  onClick: Function;
+}
 
 const CollectionPage: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [shouldRerender, setShouldRerender] = useState(false);
   const navigate = useNavigate();
+
+  const CollectionCard: React.FC<Collection> = ({ url, name, onClick }) => {
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+    const handleOpenDeleteModal = () => {
+      setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+      setIsDeleteModalOpen(false);
+    };
+
+    const handleRemoveCollection = () => {
+      removeCollection(name);
+      setShouldRerender(true);
+      setIsDeleteModalOpen(false);
+    };
+    const removeCollection = (name: string): void => {
+      let temp = localStorage.getItem("collectionList");
+      if (temp === null) {
+      } else {
+        let arr = JSON.parse(temp);
+        let updateArr = arr.filter((item: string) => item !== name);
+        localStorage.setItem("collectionList", JSON.stringify(updateArr));
+        localStorage.removeItem(name);
+      }
+    };
+    return (
+      <>
+        <StyledContainer>
+          <StyledImage src={url} onClick={() => onClick()} />
+          <StyledTitle onClick={() => onClick()}>{name}</StyledTitle>
+          <StyledModalButton onClick={() => handleOpenDeleteModal()}>
+            Remove
+          </StyledModalButton>
+        </StyledContainer>
+        {isDeleteModalOpen && (
+          <Modal
+            title="Confirm Removal"
+            content={`Are you sure you want to remove ${name}?`}
+            onConfirm={() => handleRemoveCollection()}
+            onCancel={() => handleCloseDeleteModal()}
+          />
+        )}
+      </>
+    );
+  };
   const GET_IMAGE = gql`
     query GetAnime($ids: [Int!]!) {
       Page {
@@ -33,10 +90,58 @@ const CollectionPage: React.FC = () => {
       }
     }
   `;
+  const EmptyCollection: React.FC<EmptyCollection> = ({ name, onClick }) => {
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
+    const handleOpenDeleteModal = () => {
+      setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+      setIsDeleteModalOpen(false);
+    };
+
+    const handleRemoveCollection = () => {
+      removeCollection(name);
+      setShouldRerender(true);
+      setIsDeleteModalOpen(false);
+    };
+    const removeCollection = (name: string): void => {
+      let temp = localStorage.getItem("collectionList");
+      if (temp === null) {
+      } else {
+        let arr = JSON.parse(temp);
+        let updateArr = arr.filter((item: string) => item !== name);
+        localStorage.setItem("collectionList", JSON.stringify(updateArr));
+        localStorage.removeItem(name);
+      }
+    };
+    return (
+      <>
+        <StyledContainer>
+          <StyledImage onClick={() => onClick()} src={empty} />
+          <StyledTitle onClick={() => onClick()} className="mt-15">
+            {name}
+          </StyledTitle>
+          <StyledModalButton onClick={() => handleOpenDeleteModal()}>
+            Remove
+          </StyledModalButton>
+        </StyledContainer>
+        {isDeleteModalOpen && (
+          <Modal
+            title="Confirm Removal"
+            content={`Are you sure you want to remove ${name}?`}
+            onConfirm={() => handleRemoveCollection()}
+            onCancel={() => handleCloseDeleteModal()}
+          />
+        )}
+      </>
+    );
+  };
   const toList = (name: string) => {
     navigate(`/collections/${name}`);
   };
+
   const GetCollections: React.FC = () => {
     const all = localStorage.getItem("collectionList");
     if (all) {
@@ -61,13 +166,16 @@ const CollectionPage: React.FC = () => {
               <EmptyCollection name={value} onClick={() => toList(value)} />
             ))}
           </GetImage>
-          ;
         </CollectionListContainer>
       );
     }
     return null;
   };
 
+  useEffect(() => {
+    <GetCollections />;
+    setShouldRerender(false);
+  }, [shouldRerender]);
   const GetImage: React.FC<{
     ids: number[];
     coll: string[];
@@ -137,17 +245,6 @@ const CollectionPage: React.FC = () => {
     }
   };
 
-  const removeCollection = (name: string): void => {
-    let temp = localStorage.getItem("collectionList");
-    if (temp === null) {
-    } else {
-      let arr = JSON.parse(temp);
-      let updateArr = arr.filter((item: string) => item !== name);
-      localStorage.setItem("collectionList", JSON.stringify(updateArr));
-      localStorage.removeItem(name);
-    }
-  };
-
   const AddModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     const [inputValue, setInputValue] = useState("");
 
@@ -185,10 +282,7 @@ const CollectionPage: React.FC = () => {
     <div className="bg-[#222] min-h-screen flex flex-col items-center">
       <div>
         <StyledButton onClick={() => openModal()}>
-          Add New Collection
-        </StyledButton>
-        <StyledButton onClick={() => removeCollection("")}>
-          Remove Collection
+          Add a Collection
         </StyledButton>
       </div>
       <GetCollections />
@@ -276,6 +370,55 @@ const CollectionListContainer = styled.div`
   @media (max-width: 480px) {
     grid-template-columns: repeat(1, minmax(0, 1fr));
   }
+`;
+const StyledContainer = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: left;
+  max-width: 180px;
+  max-height: 360px;
+  color: #fff;
+  width: 180px;
+  border: 1px solid #ccc;
+  background-color: #222;
+  margin-bottom: 1rem;
+  margin-left: 2rem;
+  transition: color 0.3s ease;
+  &:hover {
+    cursor: pointer;
+    color: #90ee90;
+    transition: color 0.3s;
+  }
+`;
+
+const StyledModalButton = styled.button`
+  background-color: transparent;
+  color: #fff;
+  padding: 2px 6px;
+  border: solid #fff 1px;
+  max-width: 12rem;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  cursor: pointer;
+
+  transition: color 0.3s, background-color 0.3s;
+  &:hover {
+    color: #222;
+    background-color: #fff;
+  }
+`;
+
+const StyledImage = styled.img`
+  overflow: hidden;
+  height: 240px;
+  margin-bottom: 1rem;
+`;
+const StyledTitle = styled.h3`
+  font-size: 1rem;
+  padding: 0.5rem;
+  margin-bottom: 0.2rem;
 `;
 
 export default CollectionPage;

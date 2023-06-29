@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "@emotion/styled";
+import Modal from "./Modal";
 
 interface Collection {
   url: string;
@@ -8,12 +9,47 @@ interface Collection {
 }
 
 const CollectionCard: React.FC<Collection> = ({ url, name, onClick }) => {
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const handleOpenDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+  };
+
+  const handleRemoveCollection = () => {
+    removeCollection(name);
+    setIsDeleteModalOpen(false);
+  };
+  const removeCollection = (name: string): void => {
+    let temp = localStorage.getItem("collectionList");
+    if (temp === null) {
+    } else {
+      let arr = JSON.parse(temp);
+      let updateArr = arr.filter((item: string) => item !== name);
+      localStorage.setItem("collectionList", JSON.stringify(updateArr));
+      localStorage.removeItem(name);
+    }
+  };
   return (
     <>
-      <StyledContainer onClick={() => onClick()}>
-        <StyledImage src={url} />
-        <StyledTitle>{name}</StyledTitle>
+      <StyledContainer>
+        <StyledImage src={url} onClick={() => onClick()} />
+        <StyledTitle onClick={() => onClick()}>{name}</StyledTitle>
+        <StyledModalButton onClick={() => handleOpenDeleteModal()}>
+          Remove
+        </StyledModalButton>
       </StyledContainer>
+      {isDeleteModalOpen && (
+        <Modal
+          title="Confirm Removal"
+          content={`Are you sure you want to remove ${name}?`}
+          onConfirm={() => handleRemoveCollection()}
+          onCancel={() => handleCloseDeleteModal()}
+        />
+      )}
     </>
   );
 };
@@ -42,6 +78,23 @@ const StyledContainer = styled.div`
   }
 `;
 
+const StyledModalButton = styled.button`
+  background-color: transparent;
+  color: #fff;
+  padding: 2px 6px;
+  border: solid #fff 1px;
+  max-width: 12rem;
+  border-radius: 4px;
+  font-size: 0.6rem;
+  cursor: pointer;
+
+  transition: color 0.3s, background-color 0.3s;
+  &:hover {
+    color: #222;
+    background-color: #fff;
+  }
+`;
+
 const StyledImage = styled.img`
   overflow: hidden;
   height: 240px;
@@ -49,6 +102,6 @@ const StyledImage = styled.img`
 `;
 const StyledTitle = styled.h3`
   font-size: 1rem;
-  padding: 1rem;
+  padding: 0.5rem;
   margin-bottom: 0.2rem;
 `;

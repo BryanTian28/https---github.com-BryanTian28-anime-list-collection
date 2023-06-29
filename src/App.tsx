@@ -1,11 +1,11 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Homepage from "./pages/Homepage";
-import { Routes, Route } from "react-router-dom";
 import AnimeDetailPage from "./pages/AnimeDetailPage";
 import CollectionPage from "./pages/CollectionPage";
+import CollectionDetailPage from "./pages/CollectionDetailPage";
 
 const App: React.FC = () => {
   return (
@@ -15,6 +15,7 @@ const App: React.FC = () => {
         <Route path="/" element={<Homepage />} />
         <Route path="/detail/:id" element={<AnimeDetailPage />} />
         <Route path="/collections" element={<CollectionPage />} />
+        <Route path="/collections/:name" element={<CollectionDetailPage />} />
       </Routes>
     </div>
   );

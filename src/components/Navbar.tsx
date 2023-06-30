@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
         <Link to="/" onClick={toggleMenu}>
           <StyledNavItem>Home</StyledNavItem>
         </Link>
-        <StyledNavItem>About</StyledNavItem>
+
         <Link to="/">
           <StyledNavItem>Anime</StyledNavItem>
         </Link>

@@ -223,7 +223,9 @@ const AnimeDetailPage: React.FC = () => {
                 {data.Media.isAdult ? "(18+)" : null}
               </Title>
               <Subtitle>Genres: {data.Media.genres.join(", ")}</Subtitle>
-              <Description>{data.Media.description}</Description>
+              <Description>
+                {data.Media.description.replace(/<br>/g, " ")}
+              </Description>
               <Button onClick={() => openModal()}>Add to collection</Button>
             </Container>
             <ContentWrapper>
@@ -396,6 +398,7 @@ const Button = styled.button`
   cursor: pointer;
   margin-top: 2rem;
   margin-left: 1rem;
+  margin-bottom: 1rem;
   transition: color 0.3s, background-color 0.3s;
   &:hover {
     color: #222;

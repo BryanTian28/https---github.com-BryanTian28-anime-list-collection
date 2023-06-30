@@ -144,6 +144,7 @@ const CollectionPage: React.FC = () => {
 
   const GetCollections: React.FC = () => {
     const all = localStorage.getItem("collectionList");
+
     if (all) {
       const arrayAll = JSON.parse(all);
       const idArr: number[] = [];
@@ -163,11 +164,17 @@ const CollectionPage: React.FC = () => {
 
       return (
         <CollectionListContainer>
-          <GetImage ids={idArr} coll={yesList}>
-            {noList?.map((value) => (
+          {idArr.length > 0 ? (
+            <GetImage ids={idArr} coll={yesList}>
+              {noList?.map((value) => (
+                <EmptyCollection name={value} onClick={() => toList(value)} />
+              ))}
+            </GetImage>
+          ) : (
+            noList?.map((value) => (
               <EmptyCollection name={value} onClick={() => toList(value)} />
-            ))}
-          </GetImage>
+            ))
+          )}
         </CollectionListContainer>
       );
     }

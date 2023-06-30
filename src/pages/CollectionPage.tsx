@@ -148,20 +148,22 @@ const CollectionPage: React.FC = () => {
       const arrayAll = JSON.parse(all);
       const idArr: number[] = [];
       const noList: string[] = [];
+      const yesList: string[] = [];
       arrayAll.forEach((element: string) => {
         let tempColl = localStorage.getItem(element);
 
-        if (tempColl == "null") {
+        if (tempColl === "null" || tempColl === null) {
           noList.push(element);
         } else if (tempColl) {
           let tempArr = JSON.parse(tempColl);
-          idArr.push(tempArr[0]);
+          yesList.push(element);
+          idArr.push(parseInt(tempArr[0]));
         }
       });
 
       return (
         <CollectionListContainer>
-          <GetImage ids={idArr} coll={arrayAll}>
+          <GetImage ids={idArr} coll={yesList}>
             {noList?.map((value) => (
               <EmptyCollection name={value} onClick={() => toList(value)} />
             ))}
@@ -170,6 +172,14 @@ const CollectionPage: React.FC = () => {
       );
     }
     return null;
+  };
+
+  const renderLoading = () => {
+    const forLoading = [];
+    for (let i = 0; i < 10; i++) {
+      forLoading.push(<LoadingSkeleton />);
+    }
+    return forLoading;
   };
 
   useEffect(() => {
@@ -192,7 +202,8 @@ const CollectionPage: React.FC = () => {
     const { loading, error, data } = useQuery(GET_IMAGE, {
       variables: { ids: ids },
     });
-    if (loading) return <p>Loading...</p>;
+    if (loading)
+      return <AnimeListContainer>{renderLoading()}</AnimeListContainer>;
     if (error) return <p>Error : {error.message}</p>;
     if (data) {
       let urlArr: string[] = [];
@@ -330,6 +341,37 @@ const ModalButton = styled.button`
   }
 `;
 
+const AnimeListContainer = styled.div`
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+  display: grid;
+  min-height: 100vh;
+  min-width: 90vw;
+  justify-content: space-around;
+  text-align: center;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-gap: 20px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+`;
+
+const LoadingSkeleton = styled.div`
+  min-width: 60px;
+  min-height: 280px;
+  background-color: #ccc;
+  margin: 0px 0px 16px 32px;
+`;
+
 const StyledButton = styled.button`
   background-color: transparent;
   color: #fff;
@@ -414,6 +456,11 @@ const StyledImage = styled.img`
   overflow: hidden;
   height: 240px;
   margin-bottom: 1rem;
+  transition: transform 0.3s ease-in-out;
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+  }
 `;
 const StyledTitle = styled.h3`
   font-size: 1rem;

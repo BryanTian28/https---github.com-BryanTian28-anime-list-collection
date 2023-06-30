@@ -15,11 +15,17 @@ const AnimeCard: React.FC<Anime> = ({
   duration,
   onClick,
 }) => {
+  function truncateText(text: string) {
+    if (text.length > 25) {
+      return text.slice(0, 25) + "...";
+    }
+    return text;
+  }
   return (
     <StyledContainer onClick={() => onClick()}>
       <StyledImage src={imageUrl} alt={title} />
-      <StyledTitle>{title}</StyledTitle>
-      <StyledParagraph>{duration} min</StyledParagraph>
+      <StyledTitle>{truncateText(title)}</StyledTitle>
+      <StyledParagraph>{duration || "-"} min</StyledParagraph>
     </StyledContainer>
   );
 };
@@ -39,12 +45,6 @@ const StyledContainer = styled.div`
   background-color: #222;
   margin-bottom: 1rem;
   margin-left: 2rem;
-  transition: color 0.3s ease;
-  &:hover {
-    cursor: pointer;
-    color: #90ee90;
-    transition: color 0.3s;
-  }
 `;
 
 const StyledParagraph = styled.p`
@@ -58,11 +58,23 @@ const StyledImage = styled.img`
   overflow: hidden;
   height: 240px;
   margin-bottom: 1rem;
+  transition: transform 0.3s ease-in-out;
+  &:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+  }
 `;
 
 const StyledTitle = styled.h3`
   font-size: 1rem;
+  margin-bottom: 1rem;
   padding-bottom: 1rem;
   padding-left: 1rem;
   padding-right: 1rem;
+  transition: color 0.3s ease;
+  &:hover {
+    cursor: pointer;
+    color: #90ee90;
+    transition: color 0.3s;
+  }
 `;

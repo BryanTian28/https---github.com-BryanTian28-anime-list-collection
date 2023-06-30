@@ -62,7 +62,15 @@ const Homepage: React.FC = () => {
       }
     }, [data]);
 
-    if (loading) return <StyledText>Loading...</StyledText>;
+    const renderLoading = () => {
+      const forLoading = [];
+      for (let i = 0; i < perPage; i++) {
+        forLoading.push(<LoadingSkeleton />);
+      }
+      return forLoading;
+    };
+    if (loading)
+      return <AnimeListContainer>{renderLoading()}</AnimeListContainer>;
     if (error) return <StyledText>Error : {error.message}</StyledText>;
 
     if (data) {
@@ -166,4 +174,10 @@ const Backdrop = styled.div`
   background-color: #222;
   height: 100%;
   width: 100%;
+`;
+const LoadingSkeleton = styled.div`
+  min-width: 60px;
+  min-height: 280px;
+  background-color: #ccc;
+  margin: 0px 0px 16px 32px;
 `;

@@ -24,7 +24,9 @@ const Navbar: React.FC = () => {
           <StyledNavItem>Home</StyledNavItem>
         </Link>
         <StyledNavItem>About</StyledNavItem>
-        <StyledNavItem>Anime</StyledNavItem>
+        <Link to="/">
+          <StyledNavItem>Anime</StyledNavItem>
+        </Link>
         <Link to="/collections">
           <StyledNavItem>My Collections</StyledNavItem>
         </Link>

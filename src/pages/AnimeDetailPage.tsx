@@ -1,8 +1,10 @@
-import React from "react";
+import React, { ReactNode, useState } from "react";
 import { useQuery, gql } from "@apollo/client";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "@emotion/styled";
 import AnimeCard from "../components/AnimeCard";
+import banner2 from "../assets/bannerempty.jpeg";
+import { toast, Toaster } from "react-hot-toast";
 
 interface Dates {
   year: number;
@@ -12,7 +14,10 @@ interface Dates {
 
 const AnimeDetailPage: React.FC = () => {
   const { id } = useParams();
+  const [selectedOption, setSelectedOption] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
+
   const GET_DATA_ANIME = gql`
   query GetData {
     Media(type: ANIME, id: ${id}) {
@@ -85,6 +90,79 @@ const AnimeDetailPage: React.FC = () => {
     }
   `;
 
+  const ModalComponent: React.FC<{
+    isOpen: boolean;
+    onRequestClose: () => void;
+    children: ReactNode;
+  }> = ({ isOpen, onRequestClose }) => {
+    if (!isOpen) {
+      return null;
+    }
+
+    const list = localStorage.getItem("collectionList");
+    const options: any = [];
+    console.log(list);
+
+    if (id == null) {
+    } else {
+      if (list === null || list === "null") {
+        toast("No Collection Available");
+      } else {
+        JSON.parse(list).map((value: string) => {
+          options.push(<option value={value}>{JSON.stringify(value)}</option>);
+        });
+      }
+      return (
+        <ModalOverlay>
+          <ModalContent>
+            <h2>Add to Collection</h2>
+            <label>
+              Select the collection:
+              <select
+                value={selectedOption}
+                onChange={(e) => setSelectedOption(e.target.value)}
+              >
+                <option value="">-- Select --</option>
+                {options}
+              </select>
+            </label>
+            <ModalButton onClick={() => onRequestClose()}>Cancel</ModalButton>
+            <ModalButton onClick={() => handleSubmit(selectedOption, id)}>
+              Yes
+            </ModalButton>
+          </ModalContent>
+        </ModalOverlay>
+      );
+    }
+    return null;
+  };
+
+  const openModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleSubmit = (selectedOption: string, id: string) => {
+    let listed = localStorage.getItem(selectedOption);
+    if (listed === null || listed === "null") {
+      localStorage.setItem(selectedOption, JSON.stringify([id]));
+      toast("Successfully Added");
+    } else {
+      if (!JSON.parse(listed).includes(id)) {
+        const arrays = JSON.parse(listed);
+        arrays.push(id);
+        localStorage.setItem(selectedOption, JSON.stringify(arrays));
+        toast("Successfully Added");
+      } else {
+        toast("This anime already exists in the collection");
+      }
+    }
+    closeModal();
+  };
+
   const navigateDetail = (id: any) => {
     navigate(`/detail/${id}`, { replace: true });
   };
@@ -111,7 +189,17 @@ const AnimeDetailPage: React.FC = () => {
   };
   const GetAnimeDetail: React.FC = () => {
     const { loading, error, data } = useQuery(GET_DATA_ANIME);
-    if (loading) return <StyledText>Loading...</StyledText>;
+    if (loading) {
+      return (
+        <SkeletonContainer>
+          <SkeletonImage />
+          <SkeletonText />
+          <SkeletonText />
+          <SkeletonText />
+          <SkeletonText />
+        </SkeletonContainer>
+      );
+    }
     if (error) return <StyledText>Error : {error.message}</StyledText>;
 
     if (data) {
@@ -129,17 +217,14 @@ const AnimeDetailPage: React.FC = () => {
         <>
           <Section>
             <Container>
-              <Banner
-                src={data.Media.bannerImage}
-                alt={data.Media.coverImage.medium}
-              />
+              <Banner src={data.Media.bannerImage || banner2} alt={""} />
               <Title>
                 {titleFilter(data.Media.title)}
                 {data.Media.isAdult ? "(18+)" : null}
               </Title>
               <Subtitle>Genres: {data.Media.genres.join(", ")}</Subtitle>
               <Description>{data.Media.description}</Description>
-              <Button>Add to collection</Button>
+              <Button onClick={() => openModal()}>Add to collection</Button>
             </Container>
             <ContentWrapper>
               <RightSide>
@@ -153,8 +238,11 @@ const AnimeDetailPage: React.FC = () => {
                 </DetailItem>
                 <DetailItem>
                   <Label>Aired:</Label>
-                  <Value>
-                    {formatDate(data.Media.startDate)} to{" "}
+                  <Value className="text-center">
+                    {formatDate(data.Media.startDate)}
+                    <br />
+                    to
+                    <br />
                     {data.Media.endDate.year
                       ? formatDate(data.Media.endDate)
                       : null}
@@ -162,19 +250,19 @@ const AnimeDetailPage: React.FC = () => {
                 </DetailItem>
                 <DetailItem>
                   <Label>Status:</Label>
-                  <Value>{data.Media.status}</Value>
+                  <Value>{data.Media.status.replace(/_/g, " ")}</Value>
                 </DetailItem>
                 <DetailItem>
                   <Label>Duration:</Label>
-                  <Value>{data.Media.duration}m</Value>
+                  <Value>{data.Media.duration || "N/A"}m</Value>
                 </DetailItem>
                 <DetailItem>
                   <Label>Score:</Label>
-                  <Value>{data.Media.averageScore}</Value>
+                  <Value>{data.Media.averageScore || "N/A"}</Value>
                 </DetailItem>
                 <DetailItem>
                   <Label>Studio:</Label>
-                  <Value>{data.Media.studios.edges[0].node.name}</Value>
+                  <Value>{data.Media.studios.edges[0].node.name || "-"}</Value>
                 </DetailItem>
               </RightSide>
             </ContentWrapper>
@@ -229,6 +317,12 @@ const AnimeDetailPage: React.FC = () => {
   };
   return (
     <div className="bg-[#222] min-h-screen">
+      <Toaster />
+      <ModalComponent
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        children={null}
+      />
       <GetAnimeDetail />
     </div>
   );
@@ -268,6 +362,8 @@ const Container = styled.div`
 
 const Banner = styled.img`
   max-width: 860px;
+  min-width: 750px;
+  min-height: 180px;
   max-height: 200px;
 `;
 const Title = styled.h2`
@@ -290,7 +386,21 @@ const Description = styled.p`
 `;
 
 const Button = styled.button`
-  margin-bottom: 1.5rem;
+  background-color: transparent;
+  color: #fff;
+  padding: 10px 20px;
+  border: solid #fff 1px;
+  max-width: 12rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 2rem;
+  margin-left: 1rem;
+  transition: color 0.3s, background-color 0.3s;
+  &:hover {
+    color: #222;
+    background-color: #fff;
+  }
 `;
 
 const ContentWrapper = styled.div`
@@ -309,6 +419,7 @@ const RightSide = styled.div`
   margin-top: 8rem;
   margin-left: 1rem;
   padding-right: 2rem;
+  margin-right: 0;
 `;
 
 const DetailItem = styled.div`
@@ -355,5 +466,62 @@ const AnimeListContainer = styled.div`
 
   @media (max-width: 480px) {
     grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+`;
+const SkeletonContainer = styled.div`
+  background-color: #222;
+  padding: 2rem;
+`;
+
+const SkeletonText = styled.div`
+  height: 1rem;
+  width: 100%;
+  background-color: #444;
+  margin-bottom: 1rem;
+`;
+
+const SkeletonImage = styled.div`
+  height: 240px;
+  width: 100%;
+  background-color: #444;
+  margin-bottom: 1rem;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ModalContent = styled.div`
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-radius: 4px;
+`;
+
+const ModalButton = styled.button`
+  background-color: transparent;
+  color: #222;
+  padding: 10px 20px;
+  border: solid #222 1px;
+  max-width: 12rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  margin-top: 2rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  transition: color 0.3s, background-color 0.3s;
+  &:hover {
+    color: #fff;
+    background-color: #222;
   }
 `;

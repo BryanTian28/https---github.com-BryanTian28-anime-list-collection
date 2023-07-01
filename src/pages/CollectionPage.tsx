@@ -249,7 +249,7 @@ const CollectionPage: React.FC = () => {
     if (temp === null) {
       let tempJSON = JSON.stringify([name]);
       localStorage.setItem("collectionList", tempJSON);
-      localStorage.setItem(name, JSON.stringify([]));
+      localStorage.setItem(name, JSON.stringify(null));
     } else {
       let tempJSON = JSON.parse(temp);
 
